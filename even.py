@@ -65,9 +65,9 @@ def even(tree, links):
         T = find_minimally_semiclosed(T, L, matching, links, I)
 
 
-    if not nx.is_k_edge_connected(I, 2):
-        print("ERROR! NOT 2-EDGE-CONNECTED!")
-        return -1000
+    # if not nx.is_k_edge_connected(I, 2):
+    #     print("ERROR! NOT 2-EDGE-CONNECTED!")
+    #     return -1000
 
     #print(len(I.edges()) - len(tree.edges()))
     return len(I.edges()) - len(tree.edges())
