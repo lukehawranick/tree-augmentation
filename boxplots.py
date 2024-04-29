@@ -51,7 +51,7 @@ def boxPlot(filename, size):
     plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
     # Save the figure
-    plt.savefig(f'BoxPlot{size}-{filename[:-3]}.png')
+    plt.savefig(f'{filename[:-3]}Boxplot{size}.png')
 
 
 if __name__ == '__main__':

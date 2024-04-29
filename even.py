@@ -44,6 +44,7 @@ def even(tree, links):
 
     # obtain a maximal matching on this link-set - leaf-to-leaf links which are nontwin + nonlocking
     matching = nx.maximal_matching(leaf_to_leaf)
+    m = matching.copy()
 
     #matching = set([(9,10),(22,14),(16,24),(26,27)])
 
@@ -65,9 +66,13 @@ def even(tree, links):
         T = find_minimally_semiclosed(T, L, matching, links, I)
 
 
-    # if not nx.is_k_edge_connected(I, 2):
-    #     print("ERROR! NOT 2-EDGE-CONNECTED!")
-    #     return -1000
+    if not nx.is_k_edge_connected(I, 2):
+        print("ERROR! NOT 2-EDGE-CONNECTED!")
+        print("TREE", tree.edges())
+        print("Links", links.edges())
+        print("MATCHING", m)
+        print("sol'n", I.edges())
+        return -1000
 
     #print(len(I.edges()) - len(tree.edges()))
     return len(I.edges()) - len(tree.edges())

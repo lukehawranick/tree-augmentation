@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 import tracemalloc
 import treegenerator as tg
@@ -6,18 +7,27 @@ import frederickson
 import exact
 import randomized
 import even
+import boxplots as bp
 
 
 def main():
+    # Create a directory named "results" if it doesn't exist
+    if not os.path.exists("results"):
+        os.makedirs("results")
     date = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    with open(f"results{date}.txt", "w") as file:
+
+    result_dir_path = os.path.join("results", date)
+    os.makedirs(result_dir_path)
+    result_dir = result_dir_path
+
+    with open(os.path.join(result_dir, f"results{date}.txt"), "w") as file:
         file.write(f"test, size, density, tree, frederickson, randomized, exact, even\n")
-    with open(f"time{date}.txt", "w") as file:
+    with open(os.path.join(result_dir, f"time{date}.txt"), "w") as file:
         file.write(f"test, size, density, tree, frederickson, randomized, exact, even\n")
-    with open(f"memory{date}.txt", "w") as file:
+    with open(os.path.join(result_dir, f"memory{date}.txt"), "w") as file:
         file.write(f"test, size, density, tree, frederickson, randomized, exact, even\n")
 
-    sizes = [10, 50]
+    sizes = [5]
     densities = [0.1, 0.5, 0.8]
     trees = ["path", "star", "starlike", "caterpillar", "lobster", "random"]
     treeFunc = [tg.path_tree, tg.star_tree, tg.starlike_tree, tg.caterpillar_tree, tg.lobster_tree, tg.random_tree]
@@ -25,7 +35,16 @@ def main():
     for s in sizes:
         for d in densities:
             for idx, tree in enumerate(trees):
+                if s == sizes[0] and d == densities[0] and tree == trees[0]:
+                    iterations = range(4)
+                else:
+                    iterations = range(3)
+
                 for i in iterations:
+
+                    with open(os.path.join(result_dir, f"results{date}.txt"), "a") as file:
+                        file.write(f"{i+1}, {s}, {d}, {tree}")
+                    
                     T = treeFunc[idx](s)
                     L = tg.generate_links(T, d)
                     
@@ -36,6 +55,9 @@ def main():
                     current, fredericksonMem = tracemalloc.get_traced_memory()
                     tracemalloc.stop()
 
+                    with open(os.path.join(result_dir, f"results{date}.txt"), "a") as file:
+                        file.write(f", {fredericksonNumLinks}")
+
                     tracemalloc.start()
                     st = time.time()
                     randomizedNumLinks = randomized.randomized(T, L)
@@ -43,12 +65,18 @@ def main():
                     current, randomizedMem = tracemalloc.get_traced_memory()
                     tracemalloc.stop()
 
-                    tracemalloc.start()
-                    st = time.time()
-                    exactNumLinks = exact.cutlp(T, L)
-                    exactTime = time.time() - st
-                    current, exactMem = tracemalloc.get_traced_memory()
-                    tracemalloc.stop()
+                    with open(os.path.join(result_dir, f"results{date}.txt"), "a") as file:
+                        file.write(f", {randomizedNumLinks}")
+
+                    # tracemalloc.start()
+                    # st = time.time()
+                    # exactNumLinks = exact.cutlp(T, L)
+                    # exactTime = time.time() - st
+                    # current, exactMem = tracemalloc.get_traced_memory()
+                    # tracemalloc.stop()
+                    
+                    # with open(f"results{date}.txt", "a") as file:
+                    #     file.write(f", {exactNumLinks}")
 
                     tracemalloc.start()
                     st = time.time()
@@ -56,13 +84,16 @@ def main():
                     evenTime = time.time() - st
                     current, evenMem = tracemalloc.get_traced_memory()
                     tracemalloc.stop()
+                    
+                    with open(os.path.join(result_dir, f"results{date}.txt"), "a") as file:
+                        file.write(f", {evenNumLinks}\n")
 
-                    with open(f"results{date}.txt", "a") as file:
-                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonNumLinks}, {randomizedNumLinks}, {exactNumLinks}, {evenNumLinks}\n")
-                    with open(f"time{date}.txt", "a") as file:
-                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonTime}, {randomizedTime}, {exactTime}, {evenTime}\n")
-                    with open(f"memory{date}.txt", "a") as file:
-                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonMem}, {randomizedMem}, {exactMem}, {evenMem}\n")
+                    with open(os.path.join(result_dir, f"time{date}.txt"), "a") as file:
+                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonTime}, {randomizedTime}, {evenTime}\n")
+                    with open(os.path.join(result_dir, f"memory{date}.txt"), "a") as file:
+                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonMem}, {randomizedMem}, {evenMem}\n")
+                    
+    bp.boxPlot(f"results/{date}/results{date}.txt", 5)
 
 
 if __name__ == "__main__":

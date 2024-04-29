@@ -25,7 +25,9 @@ def cutlp(T, L):
     for (i, j) in edge_list:
         model += (lp.lpSum([x for (u, v), x in X.items() if (u, v) in cover[(i, j)]]) >= 1, f"e_({i},{j})")
 
-    status = model.solve(lp.CPLEX_CMD(msg=False, timeLimit=1800))
+    print("started")
+
+    status = model.solve(lp.CPLEX_CMD(msg=False, timeLimit=3600))
 
     links_added = 0
     for (u, v), x in X.items():
