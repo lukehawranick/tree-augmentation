@@ -172,15 +172,43 @@ def check_twin_link(tree, link):
     # twin link must be leaf-to-leaf
     if tree.degree(link[0]) != 1 or tree.degree(link[1]) != 1:
         return False
-    
-    # see if contraction results in a leaf
-    copy = tree.copy()
-    contract(copy, False, link, None, None, None, None, False, False)
-    
-    # if a leaf is formed, instead of the contraction eliminating two leaves, only one will be eliminated
-    if len([node for node in copy.nodes() if copy.degree(node) == 1]) == len([node for node in tree.nodes() if tree.degree(node) == 1]) - 2:
-        return False
+
+    path1 = nx.shortest_path(tree, link[0], root_node)
+    path2 = nx.shortest_path(tree, link[1], root_node)
+
+    # Find the last common node in the two paths
+    lca_node = None
+    for n1, n2 in zip(reversed(path1), reversed(path2)):
+        if n1 == n2:
+            lca_node = n1
+        else:
+            break
+
+    for node in path1:
+        if node != lca_node and node != path1[0]:
+            if len(list(tree.neighbors(node))) != 2:
+                return False
+        elif node == lca_node:
+            if len(list(tree.neighbors(node))) != 3:
+                return False
+
+    for node in path2:
+        if node != lca_node and node != path2[0]:
+            if len(list(tree.neighbors(node))) != 2:
+                return False
+        elif node == lca_node:
+            if len(list(tree.neighbors(node))) != 3:
+                return False
+
     return True
+    # # see if contraction results in a leaf
+    # copy = tree.copy()
+    # contract(copy, False, link, None, None, None, None, False, False)
+    
+    # # if a leaf is formed, instead of the contraction eliminating two leaves, only one will be eliminated
+    # if len([node for node in copy.nodes() if copy.degree(node) == 1]) == len([node for node in tree.nodes() if tree.degree(node) == 1]) - 2:
+    #     return False
+    # return True
 
 def find_minimally_semiclosed(T, L, M, original_linkset, I):
 

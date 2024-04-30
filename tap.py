@@ -27,7 +27,7 @@ def main():
     with open(os.path.join(result_dir, f"memory{date}.txt"), "w") as file:
         file.write(f"test, size, density, tree, frederickson, randomized, exact, even\n")
 
-    sizes = [5]
+    sizes = [100, 1000, 10000]
     densities = [0.1, 0.5, 0.8]
     trees = ["path", "star", "starlike", "caterpillar", "lobster", "random"]
     treeFunc = [tg.path_tree, tg.star_tree, tg.starlike_tree, tg.caterpillar_tree, tg.lobster_tree, tg.random_tree]
