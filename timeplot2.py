@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # File path to the CSV file
-file_path = "results/20240429-113440/time20240429-113440.txt"
+file_path = "results/20240429-113440/memory20240429-113440.txt"
 
 # Read the data from the CSV file into a pandas DataFrame
 df = pd.read_csv(file_path, header=None, names=["Test", "Size", "Density", "Tree", "Frederickson", "Randomized", "Even"])
@@ -30,8 +30,8 @@ if not df_size_100.empty:
     # Plot the KDE distributions for size 100
     plt.figure(figsize=(10, 6))
     sns.kdeplot(data=df_size_100, x="Runtime", hue="Algorithm", fill=True, common_norm=False)
-    plt.title('Distribution of Runtimes for Size 100 Runtime (s) Across Algorithms')
-    plt.xlabel('Runtime (s)')
+    plt.title('Distribution of Memory Usage for Size 100 Across Algorithms')
+    plt.xlabel('Memory Usage (B)')
     plt.ylabel('Density')
     plt.xlim(left=0)  # Set x-axis limit to start from 0
 
@@ -39,7 +39,7 @@ if not df_size_100.empty:
     folder_path = "results/20240429-113440/"
 
     # Save the plot for size 100
-    plt.savefig(folder_path + "time_size_100.png")
+    plt.savefig(folder_path + "mem_size_100.png")
 
     # Show the plot
     plt.show()
@@ -54,13 +54,13 @@ if not df_size_1000.empty:
     # Plot the KDE distributions for size 1000
     plt.figure(figsize=(10, 6))
     sns.kdeplot(data=df_size_1000, x="Runtime", hue="Algorithm", fill=True, common_norm=False)
-    plt.title('Distribution of Runtimes for Size 1000 Runtime (s) Across Algorithms')
-    plt.xlabel('Runtime (s)')
+    plt.title('Distribution of Memory Usage for Size 1000 Across Algorithms')
+    plt.xlabel('Memory Usage (B)')
     plt.ylabel('Density')
     plt.xlim(left=0)  # Set x-axis limit to start from 0
 
     # Save the plot for size 1000
-    plt.savefig(folder_path + "time_size_1000.png")
+    plt.savefig(folder_path + "mem_size_1000.png")
 
     # Show the plot
     plt.show()

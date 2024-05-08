@@ -68,15 +68,10 @@ def main():
                     with open(os.path.join(result_dir, f"results{date}.txt"), "a") as file:
                         file.write(f", {randomizedNumLinks}")
 
-                    # tracemalloc.start()
-                    # st = time.time()
-                    # exactNumLinks = exact.cutlp(T, L)
-                    # exactTime = time.time() - st
-                    # current, exactMem = tracemalloc.get_traced_memory()
-                    # tracemalloc.stop()
+                    exactNumLinks, exactMem, exactTime = exact.cutlp(T, L)
                     
-                    # with open(f"results{date}.txt", "a") as file:
-                    #     file.write(f", {exactNumLinks}")
+                    with open(os.path.join(result_dir, f"results{date}.txt"), "a") as file:
+                        file.write(f", {exactNumLinks}")
 
                     tracemalloc.start()
                     st = time.time()
@@ -89,9 +84,9 @@ def main():
                         file.write(f", {evenNumLinks}\n")
 
                     with open(os.path.join(result_dir, f"time{date}.txt"), "a") as file:
-                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonTime}, {randomizedTime}, {evenTime}\n")
+                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonTime}, {randomizedTime}, {exactTime}, {evenTime}\n")
                     with open(os.path.join(result_dir, f"memory{date}.txt"), "a") as file:
-                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonMem}, {randomizedMem}, {evenMem}\n")
+                        file.write(f"{i+1}, {s}, {d}, {tree}, {fredericksonMem}, {randomizedMem}, {exactMem}, {evenMem}\n")
                     
     bp.boxPlot(f"results/{date}/results{date}.txt", 5)
 

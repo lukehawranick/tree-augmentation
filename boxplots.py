@@ -55,5 +55,5 @@ def boxPlot(filename, size):
 
 
 if __name__ == '__main__':
-    boxPlot("memory20240412-072026.txt", 10)
-    boxPlot("memory20240412-072026.txt", 50)
+    boxPlot("results/20240429-113440/results20240429-113440.txt", 100)
+    boxPlot("results/20240429-113440/results20240429-113440.txt", 1000)

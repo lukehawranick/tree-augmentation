@@ -1,4 +1,4 @@
-test, size, density, tree, frederickson, randomized, exact, even
+test, size, density, tree, frederickson, randomized, even
 1, 100, 0.1, path, 1478698, 11720854, 522116
 2, 100, 0.1, path, 1266230, 9252750, 486448
 3, 100, 0.1, path, 1230384, 7033190, 486680
