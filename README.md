@@ -1,7 +1,7 @@
-# tree augmentation
+# Tree Augmentation
 An empirical analysis is performed on several approximation algorithms for the unweighted version of the Tree Augmentation Problem (TAP). We contrast the algorithms using space, time, solution quality, and ease of implementation metrics.
 
-## Dependencies
+## Dependencies and Installation
 ### Networkx v3.3
 You can install Networkx using pip:
  - `pip install networkx==3.3`
