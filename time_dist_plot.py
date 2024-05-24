@@ -3,16 +3,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # File path to the CSV file
-file_path = "results/20240429-113440/memory20240429-113440.txt"
+file_path = "time20240522-041056.txt"
 
 # Read the data from the CSV file into a pandas DataFrame
-df = pd.read_csv(file_path, header=None, names=["Test", "Size", "Density", "Tree", "Frederickson", "Randomized", "Even"])
+df = pd.read_csv(file_path, header=None, names=["Test", "Size", "Density", "Tree", "Randomized", "Exact"])
 
 # Remove leading and trailing whitespace from the "Size" column
 df["Size"] = df["Size"].str.strip()
 
 # Melt the DataFrame to have a single runtime column
-df_melted = pd.melt(df, id_vars=["Test", "Size", "Density", "Tree"], value_vars=["Frederickson", "Randomized", "Even"], var_name="Algorithm", value_name="Runtime")
+df_melted = pd.melt(df, id_vars=["Test", "Size", "Density", "Tree"], value_vars=["Randomized", "Exact"], var_name="Algorithm", value_name="Runtime")
 df_melted["Runtime"] = pd.to_numeric(df_melted["Runtime"], errors="coerce")
 
 # Set the style of seaborn
@@ -24,6 +24,8 @@ tree_types = df_melted["Tree"].unique()[1:]
 # Filter data for sizes 100 and 1000
 df_size_100 = df_melted[df_melted["Size"] == "100"]
 df_size_1000 = df_melted[df_melted["Size"] == "1000"]
+
+print(df_size_100)
 
 # Iterate over each size and create 2x3 KDE distribution plots
 for size_df, size_name in zip([df_size_100, df_size_1000], ["size_100", "size_1000"]):
@@ -50,13 +52,13 @@ for size_df, size_name in zip([df_size_100, df_size_1000], ["size_100", "size_10
     plt.tight_layout()
 
     # Specify the folder path for saving the plot
-    folder_path = "results/20240429-113440/"
+    folder_path = ""
 
     # Save the plot
-    plt.savefig(folder_path + f"memory_distribution_{size_name}.png")
+    plt.savefig(folder_path + f"runtime_dist_{size_name}.png")
 
     # Show the plots
-    plt.show()
+    #plt.show()
 
 
 

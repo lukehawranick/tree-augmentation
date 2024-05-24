@@ -3,66 +3,60 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # File path to the CSV file
-file_path = "results/20240429-113440/memory20240429-113440.txt"
+file_path = "memory20240522-041056.txt"
 
 # Read the data from the CSV file into a pandas DataFrame
-df = pd.read_csv(file_path, header=None, names=["Test", "Size", "Density", "Tree", "Frederickson", "Randomized", "Even"])
+df = pd.read_csv(file_path, header=None, names=["Test", "Size", "Density", "Tree", "Randomized", "Exact"])
 
 # Remove leading and trailing whitespace from the "Size" column
 df["Size"] = df["Size"].str.strip()
 
 # Melt the DataFrame to have a single runtime column
-df_melted = pd.melt(df, id_vars=["Test", "Size", "Density", "Tree"], value_vars=["Frederickson", "Randomized", "Even"], var_name="Algorithm", value_name="Runtime")
+df_melted = pd.melt(df, id_vars=["Test", "Size", "Density", "Tree"], value_vars=["Randomized", "Exact"], var_name="Algorithm", value_name="Runtime")
 df_melted["Runtime"] = pd.to_numeric(df_melted["Runtime"], errors="coerce")
-
-# Print unique values in the "Size" column
-print("Unique sizes in the DataFrame:")
-print(df_melted["Size"].unique())
 
 # Set the style of seaborn
 sns.set(style="whitegrid")
 
-# Filter the DataFrame for size 100
+# Define the types of trees
+tree_types = df_melted["Tree"].unique()[1:]
+
+# Filter data for sizes 100 and 1000
 df_size_100 = df_melted[df_melted["Size"] == "100"]
-
-# Check if there's any data in the filtered DataFrame before plotting
-if not df_size_100.empty:
-    # Plot the KDE distributions for size 100
-    plt.figure(figsize=(10, 6))
-    sns.kdeplot(data=df_size_100, x="Runtime", hue="Algorithm", fill=True, common_norm=False)
-    plt.title('Distribution of Memory Usage for Size 100 Across Algorithms')
-    plt.xlabel('Memory Usage (B)')
-    plt.ylabel('Density')
-    plt.xlim(left=0)  # Set x-axis limit to start from 0
-
-    # Specify the folder path for saving the plot
-    folder_path = "results/20240429-113440/"
-
-    # Save the plot for size 100
-    plt.savefig(folder_path + "mem_size_100.png")
-
-    # Show the plot
-    plt.show()
-else:
-    print("No data available for size 100.")
-
-# Filter the DataFrame for size 1000
 df_size_1000 = df_melted[df_melted["Size"] == "1000"]
 
-# Check if there's any data in the filtered DataFrame before plotting
-if not df_size_1000.empty:
-    # Plot the KDE distributions for size 1000
-    plt.figure(figsize=(10, 6))
-    sns.kdeplot(data=df_size_1000, x="Runtime", hue="Algorithm", fill=True, common_norm=False)
-    plt.title('Distribution of Memory Usage for Size 1000 Across Algorithms')
-    plt.xlabel('Memory Usage (B)')
-    plt.ylabel('Density')
-    plt.xlim(left=0)  # Set x-axis limit to start from 0
+print(df_size_100)
 
-    # Save the plot for size 1000
-    plt.savefig(folder_path + "mem_size_1000.png")
+# Iterate over each size and create 2x3 KDE distribution plots
+for size_df, size_name in zip([df_size_100, df_size_1000], ["size_100", "size_1000"]):
+    # Create a grid of subplots with 2 rows and 3 columns
+    fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(15, 10))
 
-    # Show the plot
-    plt.show()
-else:
-    print("No data available for size 1000.")
+    # Iterate over each type of tree and plot KDE distributions
+    for i, tree_type in enumerate(tree_types):
+        if i < 6:  # Ensure i is within the bounds of axes array
+            row = i // 3  # Determine the row index
+            col = i % 3   # Determine the column index
+            filtered_data = size_df[size_df["Tree"] == tree_type]
+            if not filtered_data.empty:
+                sns.kdeplot(data=filtered_data, x="Runtime", hue="Algorithm", fill=True, common_norm=False, ax=axes[row, col])
+                axes[row, col].set_title(tree_type.capitalize())
+                axes[row, col].set_ylabel('Density')
+                axes[row, col].set_xlabel('Memory Usage (B)')
+                axes[row, col].set_xlim(left=0)  # Set x-axis limit to start from 0
+            else:
+                axes[row, col].text(0.5, 0.5, "No Data", horizontalalignment='center', verticalalignment='center', fontsize=12, color='red')
+                axes[row, col].axis('off')  # Hide the axes for empty subplots
+
+    # Adjust layout with padding between subplots
+    plt.tight_layout()
+
+    # Specify the folder path for saving the plot
+    folder_path = ""
+
+    # Save the plot
+    plt.savefig(folder_path + f"mem_dist_{size_name}.png")
+
+    # Show the plots
+    #plt.show()
+

@@ -7,7 +7,7 @@ import frederickson
 import exact
 import randomized
 import even
-import boxplots as bp
+import quality_boxplots as bp
 
 
 def main():
