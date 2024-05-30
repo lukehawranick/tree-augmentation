@@ -2,14 +2,19 @@ import networkx as nx
 
 def adjiashvili(T,L, epsilon):
 
-    # TODO: use lemma 3.2 to construct the bundle LP
-
     gamma = 168/(epsilon**2)
-    
 
-    # TODO: phase 1 of rounding algorithm - obtain L0, L1, (T,z) decomposition
+    # TODO: find OPT(B) for each B = gamma-bundle (union of gamma-many paths)
+        # split B into paths by splitting on vertices of deg >= 3
+        # iterate over 3^k^2 possibilities of pathA-pathB links (k-many leaves on B)
+            # finish covering each path with internal links (interval covering problem solvable in linear time)
+            # obtain a count for this guess
 
-    # TODO: easy step 3
+        # OPT(B) is lowest count
+
+    # TODO: formulate bundle LP = cut LP with additional OPT constraints
+
+    # TODO: round the LP solution using the easy 3-step algo
 
 def contract(tree, link, links):
     """
