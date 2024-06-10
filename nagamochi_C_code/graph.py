@@ -74,14 +74,34 @@ class Edge(object):
 
     def __str__(self):
         return f"({self.u}, {self.v}) => ({self.originalu}, {self.originalv})"
-
+    
 def dfs(T, v):
     """Run DFS to determine the parent and children of each node."""
     visited = []
-    dfsRec(T, v, visited)
+    stack = []
 
+    stack.append(v)
+
+    while len(stack):
+        #print("Stack:", stack)
+        v = stack[-1]
+        stack.pop()
+
+        if v not in visited:
+            visited.append(v)
+
+        #print("Visited:", visited)
+
+        for neighbor in nx.all_neighbors(T.graphObj, v):
+            if neighbor not in visited:
+                if T.parents[neighbor] is None:
+                    T.parents[neighbor] = v
+                    T.children[v].append(neighbor)
+                stack.append(neighbor)
+
+"""
 def dfsRec(T, v, visited):
-    """Recursive call to find parent and children of each node."""
+    #Recursive call to find parent and children of each node.
     visited.append(v)
     for neighbor in nx.all_neighbors(T.graphObj, v):
         # Check if parent not set
@@ -90,6 +110,7 @@ def dfsRec(T, v, visited):
             T.children[v].append(neighbor)
         if neighbor not in visited:
             dfsRec(T, neighbor, visited)
+"""
 
 def descendants(T, u):
     """Return list of desendants of vertex u."""
@@ -581,6 +602,7 @@ def getDepth(T, v):
         d += 1
         #v = T.parents[v]
         v = getParent(T, v)
+        #print("Parent:", v)
     return d
 
 def treePath(T, u, v):
@@ -663,10 +685,12 @@ def retain(T, G, e):
         # If we find the edge
         if (e[0] == edge.u and e[1] == edge.v) or (e[1] == edge.u and e[0] == edge.v):
             # If the original edge isn't in G.retain, add it
+            #print("Found edge (", edge.u, ",", edge.v, "). Original edge (", edge.originalu, ",", edge.originalv, ")")
             if (edge.originalu, edge.originalv) not in G.retain:
                 #print("Added", (edge.originalu, edge.originalv))
                 G.retain.append((edge.originalu, edge.originalv))
                 T.retain.append((edge.originalu, edge.originalv))
+                return
 
 def mergeVertices(G, v1, v2):
     """Merge vertices v1 and v2 into v1"""

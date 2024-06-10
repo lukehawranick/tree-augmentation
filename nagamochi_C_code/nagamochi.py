@@ -69,9 +69,11 @@ def case1(T, G):
             # Eopt is the smallest subset of E that covers F_leaf
             # Add Eopt to retain list
             for e in Eopt:
+                #print("Case 1: Retain", e)
                 graph.retain(T, G, e)
             #G.retain = G.retain + Eopt
             #T.retain = T.retain + Eopt
+            #print("Case 1 Check 1:", T.retain)
                 
             if len(Eopt) != 0:
                 ret = True
@@ -88,7 +90,9 @@ def case1(T, G):
                     if len(neighbors) != 0:
                         u2 = neighbors[0]
                         if u != G.vertices[u2]:
+                            #print("Case 1: Retain and trim", u, u2)
                             graph.retainMergeTrim(T, G, u, u2)
+                            #print("Case 1 Check 2:", T.retain)
                             #print("T after merge:", T.graphObj.nodes(), T.graphObj.edges())
                             #print("G after merge:", G.graphObj.nodes(), G.graphObj.edges())
                         
@@ -161,6 +165,7 @@ def case2(T, G):
                     ret = True
 
                     # Retain the edge (cur, triv), then contract (cur, triv) in both T and G
+                    #print("Case 2: Retain and trim", cur, triv)
                     graph.retainMergeTrim(T, G, cur, triv)
 
                 else:
@@ -391,6 +396,7 @@ def case4(T, G):
                                         # Retaining edge (u1, u2) the contract (u1, u2) in both T and G
                                         ret = True
 
+                                        print("Case 4: Retain and trim", u1, u2)
                                         graph.retainMergeTrim(T, G, u1, u2)
 
                                         """
@@ -1324,6 +1330,7 @@ def cover(T, G, v, P):
     for ec in E1:
         if ec != None:
             # Retain the edge ec, then contract ec in both T and G
+            #print("Cover: Retain and trim", ec)
             graph.retainMergeTrim(T, G, ec[0], ec[1])
         
             """
@@ -1394,6 +1401,7 @@ def cover(T, G, v, P):
                 
                 if components >= 3:
                     # Retain the edge (u, v2), then contract (u, v2) in both T and G
+                    #print("Cover components >= 3: Retain and trim", u, v2)
                     graph.retainMergeTrim(T, G, u, v2)
 
                     """
@@ -1479,6 +1487,7 @@ def cover(T, G, v, P):
                     v2 = T.vertices[ue.e[1]]
 
                     # Retain the edge (v1, v2), then contract (v1, v2) in both T and G
+                    #print("Cover uppers > 0: Retain and trim", v1, v2)
                     graph.retainMergeTrim(T, G, v1, v2)
 
                     """
@@ -1540,6 +1549,7 @@ def cover(T, G, v, P):
 
             # Retain the edge (u, uo), then contract (u, uo) in both T and G
             #print("Retain edge (", u, ",", uo, ")")
+            #print("Cover he != None: Retain and trim", u, uo)
             graph.retainMergeTrim(T, G, u, uo)
 
         """
@@ -1658,23 +1668,29 @@ def lemma9(T, G, v, P, epsilon):
     if z2 == None:
         if eStar != None:
             # Retain the edge estar, then contract eStar in both T and G
+            #print("Lemma9 eStar != None: Retain and trim", eStar)
             graph.retainMergeTrim(T, G, eStar[0], eStar[1])
 
         # Retain the edge (z1, uj), then contract (z1, uj) in both T and G
+        #print("Lemma9: Retain and trim", z1, uj)
         graph.retainMergeTrim(T, G, z1, uj)
         
     elif graph.getDepth(T, wStar) <= graph.getDepth(T, z2) - 1:
         # Retain the edge estar, then contract eStar in both T and G
+        #print("Lemma9 depth wStar <= depth z2: Retain and trim", eStar)
         graph.retainMergeTrim(T, G, eStar[0], eStar[1])
 
         # Retain the edge (z1, z2), then contract (z1, z2) in both T and G
+        #print("Lemma9 (z1,z2): Retain and trim", z1, z2)
         graph.retainMergeTrim(T, G, z1, z2)
 
     else:
         # Retain the edge (z1, uj), then contract (z1, uj) in both T and G
+        #print("Lemma9 (z1, uj): Retain and trim", z1, uj)
         graph.retainMergeTrim(T, G, z1, uj)
 
         # Retain the edge (z1, z2), then contract (z1, z2) in both T and G
+        #print("Lemma9 (z1, z2) bottom: Retain and trim", z1, z2)
         graph.retainMergeTrim(T, G, z1, z2)
 
     # Note that v should now have no children
@@ -1690,12 +1706,12 @@ def nagamochi(T, G, epsilon):
     T.root = list(T.graphObj.nodes())[0]
     T.parents[T.root] = T.root
 
-    # Use DFS to establish a parent/child relationship within the tree T
+    # Use BFS to establish a parent/child relationship within the tree T
     graph.dfs(T, T.root)
 
     #print("Tree Children:")
     #for i in range(len(T.graphObj.nodes())):
-    #    print("Children of", i, ":", graph.children(T, i))
+    #   print("Children of", i, ":", graph.children(T, i))
 
     #print("Tree Parents:", T.parents)
                       
@@ -1713,18 +1729,26 @@ def nagamochi(T, G, epsilon):
                 cases = True
                 #print("T1:", T.graphObj.nodes(), T.graphObj.edges())
                 #print("G1:", G.graphObj.nodes(), G.graphObj.edges())
+                #T.retain = list(set(tuple(sorted(p)) for p in T.retain))
+                #print("RETAIN after Case 1:", T.retain)
             while case2(T, G) == True:
                 cases = True
                 #print("T2:", T.graphObj.nodes(), T.graphObj.edges())
                 #print("G2:", G.graphObj.nodes(), G.graphObj.edges())
+                #T.retain = list(set(tuple(sorted(p)) for p in T.retain))
+                #print("RETAIN after Case 2:", T.retain)
             while case3(T, G) == True:
                 cases = True
                 #print("T3:", T.graphObj.nodes(), T.graphObj.edges())
                 #print("G3:", G.graphObj.nodes(), G.graphObj.edges())
+                #T.retain = list(set(tuple(sorted(p)) for p in T.retain))
+                #print("RETAIN after Case 3:", T.retain)
             while case4(T, G) == True:
                 cases = True
                 #print("T4:", T.graphObj.nodes(), T.graphObj.edges())
                 #print("G4:", G.graphObj.nodes(), G.graphObj.edges())
+                #T.retain = list(set(tuple(sorted(p)) for p in T.retain))
+                #print("RETAIN after Case 4:", T.retain)
             # Note that RETAIN contains all edges retained by the above procedures
             
         #print("T:", T.graphObj.nodes(), T.graphObj.edges())
@@ -1751,10 +1775,14 @@ def nagamochi(T, G, epsilon):
             if A3(T, G, P) == True:
                 # Compute an edge set E^apx in E which covers edges in T[D(v)] by procedure COVER
                 cover(T, G, mlfc[0], P)
+                #T.retain = list(set(tuple(sorted(p)) for p in T.retain))
+                #print("RETAIN after Cover:", T.retain)
             else:
                 # Compute an edge set E+ subseteq E which covers ~Fg by Lemma 9 with epsilon > 0
                 #print("Call lemma9")
                 lemma9(T, G, mlfc[0], P, epsilon)
+                #T.retain = list(set(tuple(sorted(p)) for p in T.retain))
+                #print("RETAIN after Lemma9:", T.retain)
             
         #print("T after iteration:", T.graphObj.nodes(), T.graphObj.edges())
         #print("G after iteration:", G.graphObj.nodes(), G.graphObj.edges())
@@ -1770,8 +1798,8 @@ def nagamochi(T, G, epsilon):
  
 
 def main():
-    #Tnodes = [0, 1, 2, 3, 4, 7, 6, 7]
-    #Tedges = [(2,5),(5,3),(3,4),(3,0), (5,1), (2, 6), (2,7)]
+    #Tnodes = [n for n in range(10)]
+    #Tedges = [(0, 8), (1, 5), (1, 3), (2, 8), (3, 4), (3, 8), (3, 6), (6, 7), (6, 9)]
     #Tedges = [(7,4),(2,4),(4,1),(1,9),(9,6),(6,0),(1,8),(8,3),(8,5),(5,10),(11,9)]
     #Tedges = [(1,11),(11,2),(2,7),(2,3),(3,9),(3,4),(4,10),(4,5),(5,8),(5,6),(6,0),(11,12)]
     #Tedges = [(0, 1), (1, 2), (1, 3), (2, 4), (3, 5), (4, 6)]
@@ -1782,7 +1810,7 @@ def main():
     #T = graph.MyGraph(n=Tnodes, e=Tedges)
 
     #Gnodes = list(Tnodes)
-    #Gedges = [(0, 1), (3, 2), (4,0), (6, 7)]
+    #Gedges = [(1, 2), (2, 4), (2, 6), (5, 7), (7, 0), (6, 8), (8, 9)]
     #Gedges = [(0, 1), (8, 7), (3,5), (7, 10), (3,11), (1,2)]
     #Gedges = [(1,7),(11,4),(12,2),(7,6),(2,9),(9,10),(3,5),(8,0),(3,10),(1,12),(7,9),(10,5),(10,8),(3,7),(11,7)]
     #Gedges = [(0, 4), (0, 2), (0, 5), (1, 4), (1, 6), (4, 3), (4, 5), (2, 6), (6, 3)]
@@ -1802,8 +1830,8 @@ def main():
     # Test graph generators
 
     #"""
-    Tree = tg.caterpillar_tree(10)
-    Graph = tg.generate_links(Tree, 0.5)
+    Tree = tg.random_tree(100)
+    Graph = tg.generate_links(Tree, 0.1)
 
  
     Tnodes = Tree.nodes()
