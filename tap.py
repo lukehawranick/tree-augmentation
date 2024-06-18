@@ -8,7 +8,7 @@ import exact
 import randomized
 import even
 import quality_boxplots as bp
-
+import nagamochi
 
 def main():
     # Create a directory named "results" if it doesn't exist
@@ -21,11 +21,11 @@ def main():
     result_dir = result_dir_path
 
     with open(os.path.join(result_dir, f"results{date}.txt"), "w") as file:
-        file.write(f"test, size, density, tree, frederickson, randomized, exact, even\n")
+        file.write(f"test, size, density, tree, frederickson, randomized, exact, even, nagamochi\n")
     with open(os.path.join(result_dir, f"time{date}.txt"), "w") as file:
-        file.write(f"test, size, density, tree, frederickson, randomized, exact, even\n")
+        file.write(f"test, size, density, tree, frederickson, randomized, exact, even, nagamochi\n")
     with open(os.path.join(result_dir, f"memory{date}.txt"), "w") as file:
-        file.write(f"test, size, density, tree, frederickson, randomized, exact, even\n")
+        file.write(f"test, size, density, tree, frederickson, randomized, exact, even, nagamochi\n")
 
     sizes = [100, 1000, 10000]
     densities = [0.1, 0.5, 0.8]
