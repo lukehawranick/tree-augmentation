@@ -1,12 +1,13 @@
 from collections import defaultdict
 from math import ceil
 import os
+import random
 import subprocess
 import networkx as nx
 from itertools import chain, combinations, product
 import treegenerator as tg
 
-def adjiashvili(T,L, epsilon):
+def adjiashvili(tree,L, epsilon):
     """
     Implementation of the Adjiashvili algorithm for the Tree Augmentation Problem\n
     Approximation Factor: 5/3 + epsilon\n
@@ -14,6 +15,7 @@ def adjiashvili(T,L, epsilon):
     \tL: input unweighted undirected link set
     \tepsilon: approximation factor
     """
+    T = tree.copy()
 
     # Fixed gamma (from the paper) is the number of paths in a gamma-bundle
     gamma = int(168/(epsilon**2))
@@ -223,7 +225,7 @@ def adjiashvili(T,L, epsilon):
         f.write('model adj.mod;\ndata adj.dat;\n\n')
         f.write('option solver cplex;\n\n')
         f.write('solve;\n\n')
-        f.write('display {i in LINK_LIST} X[i] > "../adjout.txt";\n')
+        f.write('display {i in LINK_LIST : X[i] > 0} i > "../adjout.txt";\n')
 
     # Define the path to the AMPL files
     ampl_path = "ampl/"
@@ -236,10 +238,132 @@ def adjiashvili(T,L, epsilon):
     # Execute commands one by one
     subprocess.run(command, shell=True, cwd=ampl_path)    
 
-    solution = set()
+    # obtain fractional solution from AMPL
+    support_indices = set()
+    with open("adjout.txt", 'r') as f:
+        for line in f.readlines()[1:-2]:
+            numbers = line.split()
+            for number in numbers:
+                support_indices.add(link_list[int(number)])
+
+    # obtain the links of the fractional solution
+    support = [link_list[i] for i in support_indices]
+
+    # arbitrarily designate a root node
+    root = random.choice(list(T.nodes()))
+
+    for link in support.copy():
+        # find all in-links
+        if root not in nx.shortest_path(T, link[0], link[1]):
+            set1 = set(nx.shortest_path(T, link[0], root))
+            # replace in-links with 2 shadows which are also up-links
+            for node in nx.shortest_path(T, link[1], root):
+                if node in set1:
+                    if node == link[0] or node == link[1]:
+                        break
+                    support.remove(link)
+                    support.append(link[0], node)
+                    support.append(node, link[1])
+                    break
+
+    # final solution set I
+    I = set()
+    
+    # rounding algorithm
+    while(1):
+
+        # if any leaf edge is covered only by up-links
+        leaf_nodes = [node for node in T.nodes if T.degree(node) == 1]
+
+        adjacent_edges = []
+        for leaf_node in leaf_nodes:    
+            adjacent_edges.extend((leaf_node, next(T.neighbors(leaf_node))))
+
+        for link in support:
+            if link[0] in leaf_nodes or link[1] in leaf_nodes:
+                if root in nx.shortest_path(T, link[0], link[1]):
+                    if link[0] in leaf_nodes:
+                        leaf_nodes.remove(link[0])
+                    if link[1] in leaf_nodes:
+                        leaf_nodes.remove(link[1])
+    
+        chosen = link[0]
+
+        # case 1: some leaf isn't covered by a cross-link
+        if len(leaf_nodes) > 0:
+            length = 0
+            # find the longest up-link and include it in the solution
+            for link in support:
+                if link[0] == leaf_nodes[0] or link[1] == leaf_nodes[0]:
+                    len_can = nx.shortest_path(T, link[0], link[1])
+                    if len(len_can) > length:
+                        length = len(len_can)
+                        chosen = link
+        else: # case 2: otherwise, look for a leaf-to-leaf link and choose it
+            leaf_nodes = [node for node in T.nodes if T.degree(node) == 1]
+            for link in support:
+                if link[0] in leaf_nodes and link[1] in leaf_nodes:
+                    chosen = link
+                    break
+            else: # otherwise ...
+                break
+
+        # contract the chosen link
+        I.add(chosen)
+        contract(T, chosen, support)
+
+    # for each leaf, choose an arbitrary link to cover it
+    leaf_nodes = [node for node in T.nodes if T.degree(node) == 1]
+    for leaf in leaf_nodes:
+        for link in support:
+            if link[0] == leaf or link[1] == leaf:
+                if root in nx.shortest_path(T, link[0], link[1]):
+                    I.add(link)
+                    support.remove(link)
+                    break
+
+    return len(I)
 
     # TODO: round the LP solution using the easy 3-step algo
+def contract(tree, link, links):
+    """
+    Contract the edges covered by a given link.\n
+    """
+    global root_node
 
+    toContract = []
+
+    # determine the set of edges covered by the link
+    shadow = nx.shortest_path(tree, link[0], link[1])
+    #print("link", link) if not_copy and update_map else None
+    # perpare each edge for contraction
+    for i in range(len(shadow)-1):
+        toContract.append([shadow[i],shadow[i+1]]) if [shadow[i],shadow[i+1]] not in toContract and [shadow[i+1],shadow[i]] not in toContract else None
+
+    # contract each edge covered by the link
+    while(not len(toContract) == 0):
+
+        # update the root node if necessary
+        if toContract[0][1] == root_node:
+            root_node = toContract[0][0]
+
+        # contract the first edge in the list
+        nx.contracted_edge(tree,tuple(toContract[0]),self_loops=False, copy=False)
+
+        # add the tree edge to L for the sake of contracting to see the resulting link configuration
+        if links is not None and tuple(toContract[0]) not in links.edges() and tuple(toContract[0])[::-1] not in links.edges():
+            links.add_edge(*tuple(toContract[0]))
+        nx.contracted_edge(links,tuple(toContract[0]),self_loops=False, copy=False) if links is not None else None
+
+        # if any other edge in our list is adjacent to the "dest" node of contraction, re-index it
+        for toFix in toContract[1:]:
+            if(toFix[0] == toContract[0][1]):
+                toFix[0] = toContract[0][0]
+            elif(toFix[1] == toContract[0][1]):
+                toFix[1] = toContract[0][0]
+
+        # remove the edge we contracted from our list, 
+        toContract.remove(toContract[0])
 
 def cover(uncovered_edges, available_links):
     """
@@ -352,7 +476,7 @@ def split_edges_at_high_degree_vertices(edges):
     # identify nodes of degree >= 3
     high_degree_vertices = {node for node, deg in degree.items() if deg >= 3}
 
-    # if the input tree is a path, return all edges
+    # if the input tree is a disjoint union of paths, return all edges
     if high_degree_vertices == set():
         return [edges], nodes, leaves
     
